@@ -127,6 +127,10 @@ def add_item_to_notion_database(game, achievements_info, review_text, steam_stor
             "类型": {
                 "type": "multi_select",
                 "multi_select": steam_store_data['tag']
+            },
+            "平台": {
+                "type": "multi_select",
+                "multi_select": [{"name": "Steam"}]
             }
         },
         "cover": {"type": "external", "external": {"url": f"{cover_url}"}},
@@ -197,6 +201,10 @@ def update_item_to_notion_database(page_id, game, achievements_info, review_text
             "类型": {
                 "type": "multi_select",
                 "multi_select": steam_store_data['tag']
+            },
+            "平台": {
+                "type": "multi_select",
+                "multi_select": [{"name": "Steam"}]
             }
         },
         "cover": {"type": "external", "external": {"url": f"{cover_url}"}},
@@ -232,6 +240,7 @@ def database_create(page_id):
             "名称": {"title": {}},
             "描述": {"rich_text": {}},
             "类型": {"multi_select": {}},
+            "平台": {"multi_select": {}},
         },
     }
 

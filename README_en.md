@@ -23,6 +23,7 @@ The table format in Notion will look like this:
 | 🎮 名称          | `title`   | Game Name |
 | 📟 描述          | `text`    | Game Info |
 | 🎨 类型          | `multi-select` | Game Tags |
+| 🖥️ 平台          | `multi-select` | Game Platform (fixed as Steam) |
 | 🖼️ Page Icon     | `image`   | Game Logo (auto-set) |
 | 🖼️ Page Cover    | `image`   | Game Cover (auto-set) |
 
@@ -46,6 +47,7 @@ Ensure your Notion database includes the following fields:
 | `名称`                   | `title`   |
 | `描述`                   | `text`    |
 | `类型`                   | `multi-select` |
+| `平台`                   | `multi-select` |
 
 **Note**: Page icon and page cover will be set automatically, no need to create these fields manually.
 
