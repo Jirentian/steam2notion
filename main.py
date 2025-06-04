@@ -227,7 +227,7 @@ def database_create(page_id):
             "type": "page_id",
             "page_id": page_id,
         },
-        "title": [{"type": "text", "text": {"content": "Game List"}}],
+        "title": [{"type": "text", "text": {"content": "游戏库"}}],
         "properties": {
             "名称": {"title": {}},
             "描述": {"rich_text": {}},
