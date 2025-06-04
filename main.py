@@ -30,6 +30,7 @@ RETRY_DELAY = 2
 def send_request_with_retry(
     url, headers=None, json_data=None, retries=MAX_RETRIES, method="patch"
 ):
+    response = None
     while retries > 0:
         try:
             if method == "patch":
@@ -42,12 +43,18 @@ def send_request_with_retry(
             response.raise_for_status()  # 如果响应状态码不是200系列，则抛出HTTPError异常
             return response
         except requests.exceptions.RequestException as e:
-            logger.error(f"Request Exception occurred: <{e}> .Error: {response.text},Retring....")
+            error_msg = f"Request Exception occurred: <{e}>"
+            if response is not None:
+                try:
+                    error_msg += f" .Error: {response.text}"
+                except:
+                    error_msg += " .Error: Unable to get response text"
+            logger.error(f"{error_msg},Retring....")
             retries -= 1
             if retries > 0:
                 time.sleep(RETRY_DELAY)  # 等待一段时间后再重试
             else:
-                logger.error(f"Max retries exceeded .Error: {response.text},Giving up.")
+                logger.error(f"Max retries exceeded. Giving up.")
                 return {}
 
 
@@ -64,10 +71,14 @@ def get_owned_game_data_from_steam():
 
     try:
         response = send_request_with_retry(url, method="get")
+        if isinstance(response, dict):  # 检查是否是重试失败返回的空字典
+            logger.error("Failed to get Steam data after all retries")
+            return None
         logger.info("fetching data success!")
         return response.json()
     except Exception as e:
-        logger.error(f"Failed to send request: {e},Error: {response.text}")
+        logger.error(f"Failed to send request: {e}")
+        return None
 
 
 def query_achievements_info_from_steam(game):
@@ -321,6 +332,14 @@ if __name__ == "__main__":
         logger.addHandler(console_handler)
 
     owned_game_data = get_owned_game_data_from_steam()
+    
+    if owned_game_data is None:
+        logger.error("Failed to get owned games data from Steam. Please check your API credentials.")
+        exit(1)
+    
+    if "response" not in owned_game_data or "games" not in owned_game_data["response"]:
+        logger.error("Invalid response format from Steam API")
+        exit(1)
 
     for game in owned_game_data["response"]["games"]:
         is_add = True
