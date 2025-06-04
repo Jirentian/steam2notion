@@ -4,7 +4,7 @@
 
 ---
 
-2025.5.27 Update：Added the functionality to fetch game info and game tags from steam store. The previous version will no longer work and requires adding a "info" (text) and "tags"(multi-select) field to the database in order to work.
+2025.5.27 Update: Simplified field structure. Now only keeps core fields: Game Name (changed to "名称"), Game Info (changed to "描述"), and Game Tags (changed to "类型"). Game Logo is set as page icon, and Game Cover is set as page cover. Removed playtime, last played time, store link, completion rate, achievement counts, and review fields.
 
 2025.5.11 Update：Added the functionality to fetch Steam reviews, which will now fetch user reviews from Steam into the Notion database. The previous version will no longer work and requires adding a "review" (text) field to the database in order to work.
 
@@ -18,20 +18,13 @@ The table format in Notion will look like this:
 
 ### 📊 Imported Data Fields:
 
-| Field Name       | Data Type |
-| ----------------- | --------- |
-| 🎮 Game Name      | `title`   |
-| ⏱️ Playtime (h)   | `number`  |
-| 📅 Last Played    | `date`    |
-| 🔗 Store Link     | `url`     |
-| 🖼️ Game Logo      | `image`   |
-| 🖼️ Game Cover     | `image`   |
-| ✅ Completion     | `number`  |
-| 🏆 Achieved Achievements | `number` |
-| 🏅 Total Achievements | `number` |
-| ✍️ review | `text` |
-| 📟 info      | `text` |
-| 🎨 tags      | `multi-select` |
+| Field Name       | Data Type | Description |
+| ----------------- | --------- | ----------- |
+| 🎮 名称          | `title`   | Game Name |
+| 📟 描述          | `text`    | Game Info |
+| 🎨 类型          | `multi-select` | Game Tags |
+| 🖼️ Page Icon     | `image`   | Game Logo (auto-set) |
+| 🖼️ Page Cover    | `image`   | Game Cover (auto-set) |
 
 ---
 
@@ -44,25 +37,17 @@ Click the **Fork** button on the repository page:
 ![Fork Example](./image/README_zh_cn/1724727797319.png)
 
 ---
-### 2️⃣ **Ceate a notion database with these data field**
+### 2️⃣ **Create a notion database with these data fields**
 
 Ensure your Notion database includes the following fields:
 
 | Field Name               | Data Type |
 | ------------------------ | --------- |
-| `name`                   | `title`   |
-| `playtime`               | `number`  |
-| `last play`              | `date`    |
-| `store url`              | `url`     |
-| `completion`             | `number`  |
-| `achieved achievements`  | `number`  |
-| `total achievements`     | `number`  |
-| `review`     | `text`  |
-| `info`      | `text` |
-| `tags`      | `multi-select` |
+| `名称`                   | `title`   |
+| `描述`                   | `text`    |
+| `类型`                   | `multi-select` |
 
-
-
+**Note**: Page icon and page cover will be set automatically, no need to create these fields manually.
 
 ### 3️⃣ **Configure GitHub Action Variables**
 

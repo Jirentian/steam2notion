@@ -102,22 +102,8 @@ def add_item_to_notion_database(game, achievements_info, review_text, steam_stor
 
     logger.info(f"adding game {game['name']} to notion...")
 
-    playtime = round(float(game["playtime_forever"]) / 60, 1)
-    last_played_time = time.strftime(
-        "%Y-%m-%d", time.localtime(game["rtime_last_played"])
-    )
-    store_url = f"https://store.steampowered.com/app/{game['appid']}"
     icon_url = f"https://media.steampowered.com/steamcommunity/public/images/apps/{game['appid']}/{game['img_icon_url']}.jpg"
     cover_url = f"https://steamcdn-a.akamaihd.net/steam/apps/{game['appid']}/header.jpg"
-    total_achievements = achievements_info["total"]
-    achieved_achievements = achievements_info["achieved"]
-
-    if total_achievements > 0:
-        completion = round(
-            float(achieved_achievements) / float(total_achievements) * 100, 1
-        )
-    else:
-        completion = -1
 
     data = {
         "parent": {
@@ -125,32 +111,11 @@ def add_item_to_notion_database(game, achievements_info, review_text, steam_stor
             "database_id": f"{NOTION_DATABASE_ID}",
         },
         "properties": {
-            "name": {
+            "名称": {
                 "type": "title",
                 "title": [{"type": "text", "text": {"content": f"{game['name']}"}}],
             },
-            "playtime": {"type": "number", "number": playtime},
-            "last play": {"type": "date", "date": {"start": last_played_time}},
-            "store url": {
-                "type": "url",
-                "url": store_url,
-            },
-            "completion": {"type": "number", "number": completion},
-            "total achievements": {"type": "number", "number": total_achievements},
-            "achieved achievements": {
-                "type": "number",
-                "number": achieved_achievements,
-            },
-            "review": {
-                "type": "rich_text",
-                "rich_text": [
-                    {
-                        "type": "text",
-                        "text": {"content": review_text},
-                    }
-                ],
-            },
-            "info": {
+            "描述": {
                 "type": "rich_text",
                 "rich_text": [
                     {
@@ -159,7 +124,7 @@ def add_item_to_notion_database(game, achievements_info, review_text, steam_stor
                     }
                 ],
             },
-            "tags": {
+            "类型": {
                 "type": "multi_select",
                 "multi_select": steam_store_data['tag']
             }
@@ -187,7 +152,7 @@ def query_item_from_notion_database(game):
     }
 
     logger.info(f"querying {game['name']} from database")
-    data = {"filter": {"property": "name", "rich_text": {"equals": f"{game['name']}"}}}
+    data = {"filter": {"property": "名称", "title": {"equals": f"{game['name']}"}}}
 
     try:
         response = send_request_with_retry(
@@ -209,53 +174,18 @@ def update_item_to_notion_database(page_id, game, achievements_info, review_text
         "Notion-Version": "2022-06-28",
     }
 
-    playtime = round(float(game["playtime_forever"]) / 60, 1)
-    last_played_time = time.strftime(
-        "%Y-%m-%d", time.localtime(game["rtime_last_played"])
-    )
-    store_url = f"https://store.steampowered.com/app/{game['appid']}"
     icon_url = f"https://media.steampowered.com/steamcommunity/public/images/apps/{game['appid']}/{game['img_icon_url']}.jpg"
     cover_url = f"https://steamcdn-a.akamaihd.net/steam/apps/{game['appid']}/header.jpg"
-    total_achievements = achievements_info["total"]
-    achieved_achievements = achievements_info["achieved"]
-
-    if total_achievements > 0:
-        completion = round(
-            float(achieved_achievements) / float(total_achievements) * 100, 1
-        )
-    else:
-        completion = -1
 
     logger.info(f"updating {game['name']} to notion...")
 
     data = {
         "properties": {
-            "name": {
+            "名称": {
                 "type": "title",
                 "title": [{"type": "text", "text": {"content": f"{game['name']}"}}],
             },
-            "playtime": {"type": "number", "number": playtime},
-            "last play": {"type": "date", "date": {"start": last_played_time}},
-            "store url": {
-                "type": "url",
-                "url": store_url,
-            },
-            "completion": {"type": "number", "number": completion},
-            "total achievements": {"type": "number", "number": total_achievements},
-            "achieved achievements": {
-                "type": "number",
-                "number": achieved_achievements,
-            },
-            "review": {
-                "type": "rich_text",
-                "rich_text": [
-                    {
-                        "type": "text",
-                        "text": {"content": review_text},
-                    }
-                ],
-            },
-            "info": {
+            "描述": {
                 "type": "rich_text",
                 "rich_text": [
                     {
@@ -264,7 +194,7 @@ def update_item_to_notion_database(page_id, game, achievements_info, review_text
                     }
                 ],
             },
-            "tags": {
+            "类型": {
                 "type": "multi_select",
                 "multi_select": steam_store_data['tag']
             }
@@ -299,13 +229,9 @@ def database_create(page_id):
         },
         "title": [{"type": "text", "text": {"content": "Game List"}}],
         "properties": {
-            "name": {"title": {}},
-            "completion": {"number": {}},
-            "playtime": {"number": {}},
-            "last play": {"date": {}},
-            "total achievements": {"number": {}},
-            "achieved achievements": {"number": {}},
-            "store url": {"url": {}},
+            "名称": {"title": {}},
+            "描述": {"rich_text": {}},
+            "类型": {"multi_select": {}},
         },
     }
 
@@ -325,11 +251,8 @@ def is_record(game, achievements):
     timestamp = time.mktime(time_tuple)
     playtime = round(float(game["playtime_forever"]) / 60, 1)
 
-    if (playtime < 0.1 and achievements["total"] < 1) or (
-        game["rtime_last_played"] < timestamp
-        and achievements["total"] < 1
-        and playtime < 6
-    ):
+    # 简化过滤条件：如果游戏时间很少且上次游戏时间很早，则不记录
+    if playtime < 0.1 or game["rtime_last_played"] < timestamp:
         logger.info(f"{game['name']} does not meet filter rule!")
         return False
 
@@ -393,10 +316,12 @@ if __name__ == "__main__":
     for game in owned_game_data["response"]["games"]:
         is_add = True
         achievements_info = {}
-        achievements_info = get_achievements_count(game)
-        review_text = get_steam_review_info(game["appid"], STEAM_USER_ID)
+        # 由于不再需要成就信息，设置默认值
+        achievements_info["total"] = 0
+        achievements_info["achieved"] = 0
+        # 不再获取评测信息
+        review_text = ""
         steam_store_data = get_steam_store_info(game["appid"])
-        logger.info(f"{game['name']} ' review is {review_text}")
 
         if "rtime_last_played" not in game:
             logger.info(f"{game['name']} have no last play time! setting to 0!")
